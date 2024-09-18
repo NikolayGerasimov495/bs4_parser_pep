@@ -8,15 +8,14 @@ from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
 from constants import BASE_DIR, MAIN_DOC_URL, PEP_URL
+from exceptions import NoWhatsNewDataAndNoVersionDataError
 from outputs import control_output
 from utils import find_tag, get_response
 
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    response = get_response(session, whats_new_url)
-
-    soup = BeautifulSoup(response.text, features='lxml')
+    response, soup = get_response(session, whats_new_url)
 
     main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
     div_with_ul = find_tag(main_div, 'div', attrs={'class': 'toctree-wrapper'})
@@ -45,8 +44,7 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    response = get_response(session, MAIN_DOC_URL)
-    soup = BeautifulSoup(response.text, 'lxml')
+    response, soup = get_response(session, MAIN_DOC_URL)
 
     sidebar = find_tag(soup, 'div', attrs={'class': "sphinxsidebarwrapper"})
     ul_tags = sidebar.find_all('ul')
@@ -55,6 +53,9 @@ def latest_versions(session):
         if 'All versions' in ul.text:
             a_tags = ul.find_all('a')
             break
+
+    else:
+        raise NoWhatsNewDataAndNoVersionDataError('Не удалось найти данные о последних версиях Python')
 
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
 
@@ -78,9 +79,7 @@ def latest_versions(session):
 
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    response = get_response(session, downloads_url)
-
-    soup = BeautifulSoup(response.text, 'lxml')
+    response, soup = get_response(session, downloads_url)
 
     tag_table = find_tag(soup, 'table', attrs={'class': 'docutils'})
     pdf_a4_tag = tag_table.find('a', {'href': re.compile(r'.+pdf-a4\.zip$')})
@@ -101,8 +100,7 @@ def download(session):
 
 
 def pep(session):
-    response = get_response(session, PEP_URL)
-    soup = BeautifulSoup(response.text, 'lxml')
+    response, soup = get_response(session, PEP_URL)
 
     section_tag = find_tag(soup, 'section', attrs={'id': 'numerical-index'})
     tag_tbody = find_tag(section_tag, 'tbody')
@@ -122,9 +120,8 @@ def pep(session):
         # Статус в самой карточке
         tag_href = td['href']
         version_link = urljoin(PEP_URL, tag_href)
-        response = get_response(session, version_link)
+        response, soup = get_response(session, version_link)
 
-        soup = BeautifulSoup(response.text, 'lxml')
         dl_tag = find_tag(soup, 'dl',
                           attrs={'class': 'rfc2822 field-list simple'})
         status = dl_tag.find(string=re.compile(r'^Status$')).parent
