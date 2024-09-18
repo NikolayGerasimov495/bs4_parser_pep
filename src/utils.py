@@ -2,7 +2,8 @@ import logging
 
 from requests import RequestException
 
-from exceptions import NoWhatsNewDataAndNoVersionDataError, ParserFindTagException
+from exceptions import (NoWhatsNewDataAndNoVersionDataError,
+                        ParserFindTagException)
 
 
 def get_response(session, url):
@@ -12,7 +13,9 @@ def get_response(session, url):
         if response.status_code == 200:
             return response
         else:
-            error_msg = f'Ошибка при загрузке страницы {url}, код ответа: {response.status_code}'
+            error_msg = \
+                (f'Ошибка при загрузке страницы {url}, '
+                 f'код ответа: {response.status_code}')
             logging.error(error_msg)
             raise NoWhatsNewDataAndNoVersionDataError(error_msg)
     except RequestException as e:

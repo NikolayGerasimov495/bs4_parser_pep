@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
 from constants import BASE_DIR, MAIN_DOC_URL, PEP_URL
-from exceptions import NoWhatsNewDataAndNoVersionDataError
 from outputs import control_output
 from utils import find_tag, get_response
 
@@ -145,8 +144,8 @@ def pep(session):
     status_counts = {}
     for status, count in results[1:]:
         status_counts[status] = status_counts.get(status, 0) + count
-    results = [('Статус', 'Количество')] + [(status, count) for status,
-    count in status_counts.items()]
+    results = ([('Статус', 'Количество')] +
+               [(status, count) for status, count in status_counts.items()])
 
     # Добавляем строку с общим количеством
     total_count = sum(count for _, count in results[1:])
