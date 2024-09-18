@@ -28,7 +28,7 @@ def whats_new(session):
         version_a_tag = section.find('a')
         href = version_a_tag['href']
         version_link = urljoin(whats_new_url, href)
-        response= get_response(session, version_link)
+        response = get_response(session, version_link)
         soup = get_soup(response)
 
         h1 = find_tag(soup, 'h1')
