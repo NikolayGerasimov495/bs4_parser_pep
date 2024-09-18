@@ -45,16 +45,12 @@ def test_get_response(mock_session):
             text='You are breathtaken',
             status_code=200
         )
-        response, soup = utils.get_response(
+        got = utils.get_response(
             mock_session,
             MAIN_DOC_URL + 'unexisting_page/'
         )
-        assert isinstance(response, requests.models.Response), (
+        assert isinstance(got, requests.models.Response), (
             'Убедитесь что функция `get_response` в модуле `utils.py` '
             'делает запрос к странице и возвращает ответ. \n'
             'Кстати: You are breathtaken!'
-        )
-        assert isinstance(soup, bs4.BeautifulSoup), (
-            'Убедитесь что функция `get_response` в модуле `utils.py` '
-            'возвращает также объект BeautifulSoup.'
         )

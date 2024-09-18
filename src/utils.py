@@ -7,13 +7,16 @@ from exceptions import (NoWhatsNewDataAndNoVersionDataError,
                         ParserFindTagException)
 
 
+def get_soup(response):
+    return BeautifulSoup(response.text, features='lxml')
+
+
 def get_response(session, url):
     try:
         response = session.get(url)
         response.encoding = 'utf-8'
         if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'lxml')
-            return response, soup
+            return response
         error_msg = (f'Ошибка при загрузке страницы {url}, '
                      f'код ответа: {response.status_code}')
         logging.error(error_msg)
