@@ -2,19 +2,23 @@ import logging
 
 from requests import RequestException
 
-from exceptions import ParserFindTagException
+from exceptions import NoWhatsNewDataAndNoVersionDataError, ParserFindTagException
 
 
 def get_response(session, url):
     try:
         response = session.get(url)
         response.encoding = 'utf-8'
-        return response
-    except RequestException:
-        logging.exception(
-            f'Возникла ошибка при загрузке страницы {url}',
-            stack_info=True
-        )
+        if response.status_code == 200:
+            return response
+        else:
+            error_msg = f'Ошибка при загрузке страницы {url}, код ответа: {response.status_code}'
+            logging.error(error_msg)
+            raise NoWhatsNewDataAndNoVersionDataError(error_msg)
+    except RequestException as e:
+        error_msg = f'Возникла ошибка при загрузке страницы {url}'
+        logging.exception(error_msg, stack_info=True)
+        raise NoWhatsNewDataAndNoVersionDataError(error_msg) from e
 
 
 def find_tag(soup, tag, attrs=None):

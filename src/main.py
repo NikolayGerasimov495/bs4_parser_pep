@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
 from constants import BASE_DIR, MAIN_DOC_URL, PEP_URL
+from exceptions import NoWhatsNewDataAndNoVersionDataError
 from outputs import control_output
 from utils import find_tag, get_response
 
@@ -15,8 +16,7 @@ from utils import find_tag, get_response
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
     response = get_response(session, whats_new_url)
-    if response is None:
-        return
+
     soup = BeautifulSoup(response.text, features='lxml')
 
     main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
@@ -30,10 +30,8 @@ def whats_new(session):
         version_a_tag = section.find('a')
         href = version_a_tag['href']
         version_link = urljoin(whats_new_url, href)
-
         response = get_response(session, version_link)
-        if response is None:
-            continue
+
         soup = BeautifulSoup(response.text, 'lxml')
 
         h1 = find_tag(soup, 'h1')
@@ -49,9 +47,6 @@ def whats_new(session):
 
 def latest_versions(session):
     response = get_response(session, MAIN_DOC_URL)
-    if response is None:
-        return
-
     soup = BeautifulSoup(response.text, 'lxml')
 
     sidebar = find_tag(soup, 'div', attrs={'class': "sphinxsidebarwrapper"})
@@ -61,9 +56,6 @@ def latest_versions(session):
         if 'All versions' in ul.text:
             a_tags = ul.find_all('a')
             break
-
-    else:
-        raise Exception('Ничего не нашлось')
 
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
 
@@ -88,8 +80,6 @@ def latest_versions(session):
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
     response = get_response(session, downloads_url)
-    if response is None:
-        return
 
     soup = BeautifulSoup(response.text, 'lxml')
 
@@ -113,8 +103,6 @@ def download(session):
 
 def pep(session):
     response = get_response(session, PEP_URL)
-    if response is None:
-        return
     soup = BeautifulSoup(response.text, 'lxml')
 
     section_tag = find_tag(soup, 'section', attrs={'id': 'numerical-index'})
@@ -136,8 +124,7 @@ def pep(session):
         tag_href = td['href']
         version_link = urljoin(PEP_URL, tag_href)
         response = get_response(session, version_link)
-        if response is None:
-            continue
+
         soup = BeautifulSoup(response.text, 'lxml')
         dl_tag = find_tag(soup, 'dl',
                           attrs={'class': 'rfc2822 field-list simple'})
@@ -157,12 +144,9 @@ def pep(session):
     # Обновляем количество для каждого статуса
     status_counts = {}
     for status, count in results[1:]:
-        if status in status_counts:
-            status_counts[status] += count
-        else:
-            status_counts[status] = count
+        status_counts[status] = status_counts.get(status, 0) + count
     results = [('Статус', 'Количество')] + [(status, count) for status,
-                                            count in status_counts.items()]
+    count in status_counts.items()]
 
     # Добавляем строку с общим количеством
     total_count = sum(count for _, count in results[1:])
