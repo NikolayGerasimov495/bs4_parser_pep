@@ -28,9 +28,7 @@ def whats_new(session):
         version_a_tag = section.find('a')
         href = version_a_tag['href']
         version_link = urljoin(whats_new_url, href)
-        response = get_response(session, version_link)
-
-        soup = BeautifulSoup(response.text, 'lxml')
+        response, soup = get_response(session, version_link)
 
         h1 = find_tag(soup, 'h1')
         dl = soup.find('dl')  # Найдите в "супе" тег dl.
