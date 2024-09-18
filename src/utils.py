@@ -24,7 +24,6 @@ def get_response(session, url):
         raise NoWhatsNewDataAndNoVersionDataError(error_msg) from e
 
 
-
 def find_tag(soup, tag, attrs=None):
     searched_tag = soup.find(tag, attrs=(attrs or {}))
     if searched_tag is None:

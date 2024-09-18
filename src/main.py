@@ -55,7 +55,8 @@ def latest_versions(session):
             break
 
     else:
-        raise NoWhatsNewDataAndNoVersionDataError('Не удалось найти данные о последних версиях Python')
+        raise NoWhatsNewDataAndNoVersionDataError(
+            'Не удалось найти данные о последних версиях Python')
 
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
 
