@@ -9,17 +9,12 @@ from configs import configure_argument_parser, configure_logging
 from constants import BASE_DIR, MAIN_DOC_URL, PEP_URL
 from exceptions import NoWhatsNewDataAndNoVersionDataError
 from outputs import control_output
-from utils import find_tag, get_response, get_soup
+from utils import find_tag, get_page_info
 
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    response = get_response(session, whats_new_url)
-    # TODO
-    # Вот так могу оставить, но тесты не принимают
-    # response, soup = get_response(session, whats_new_url)
-    # TODO
-    soup = get_soup(response)
+    response, soup = get_page_info(session, whats_new_url)
 
     main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
     div_with_ul = find_tag(main_div, 'div', attrs={'class': 'toctree-wrapper'})
@@ -32,8 +27,7 @@ def whats_new(session):
         version_a_tag = section.find('a')
         href = version_a_tag['href']
         version_link = urljoin(whats_new_url, href)
-        response = get_response(session, version_link)
-        soup = get_soup(response)
+        response, soup = get_page_info(session, version_link)
 
         h1 = find_tag(soup, 'h1')
         dl = soup.find('dl')  # Найдите в "супе" тег dl.
@@ -47,8 +41,7 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    response = get_response(session, MAIN_DOC_URL)
-    soup = get_soup(response)
+    response, soup = get_page_info(session, MAIN_DOC_URL)
 
     sidebar = find_tag(soup, 'div', attrs={'class': "sphinxsidebarwrapper"})
     ul_tags = sidebar.find_all('ul')
@@ -84,8 +77,7 @@ def latest_versions(session):
 
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    response = get_response(session, downloads_url)
-    soup = get_soup(response)
+    response, soup  = get_page_info(session, downloads_url)
 
     tag_table = find_tag(soup, 'table', attrs={'class': 'docutils'})
     pdf_a4_tag = tag_table.find('a', {'href': re.compile(r'.+pdf-a4\.zip$')})
@@ -106,8 +98,7 @@ def download(session):
 
 
 def pep(session):
-    response = get_response(session, PEP_URL)
-    soup = get_soup(response)
+    response, soup = get_page_info(session, PEP_URL)
 
     section_tag = find_tag(soup, 'section', attrs={'id': 'numerical-index'})
     tag_tbody = find_tag(section_tag, 'tbody')
@@ -127,8 +118,7 @@ def pep(session):
         # Статус в самой карточке
         tag_href = td['href']
         version_link = urljoin(PEP_URL, tag_href)
-        response = get_response(session, version_link)
-        soup = get_soup(response)
+        response, soup = get_page_info(session, version_link)
 
         dl_tag = find_tag(soup, 'dl',
                           attrs={'class': 'rfc2822 field-list simple'})

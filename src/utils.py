@@ -7,17 +7,10 @@ from exceptions import (NoWhatsNewDataAndNoVersionDataError,
                         ParserFindTagException)
 
 
-# Это я уберу
-def get_soup(response):
-    return BeautifulSoup(response.text, features='lxml')
-# TODO
-# У меня не получается сюда погрузить soup, т.к.
-# тесты хотят видеть ответ response и ничего другого.
-# Тесты я переделывал, чтобы два аргумента принимал.
-# Но тесты сайта потом блочили.
-# Другого способа написать функцию, например как ниже - я не умею.
-# Если можете - подскажите.
-# TODO
+def get_page_info(session, url):
+    response = get_response(session, url)
+    soup = BeautifulSoup(response.text, features='lxml')
+    return response, soup
 
 
 def get_response(session, url):
@@ -25,11 +18,6 @@ def get_response(session, url):
         response = session.get(url)
         response.encoding = 'utf-8'
         if response.status_code == 200:
-            # TODO
-            # Вот так могу оставить, но тесты не принимают
-            # soup = BeautifulSoup(response.text, features='lxml')
-            # return response, soup
-            # TODO
             return response
         error_msg = (f'Ошибка при загрузке страницы {url}, '
                      f'код ответа: {response.status_code}')
