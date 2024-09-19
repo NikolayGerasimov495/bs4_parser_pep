@@ -77,7 +77,7 @@ def latest_versions(session):
 
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    response, soup  = get_page_info(session, downloads_url)
+    response, soup = get_page_info(session, downloads_url)
 
     tag_table = find_tag(soup, 'table', attrs={'class': 'docutils'})
     pdf_a4_tag = tag_table.find('a', {'href': re.compile(r'.+pdf-a4\.zip$')})
