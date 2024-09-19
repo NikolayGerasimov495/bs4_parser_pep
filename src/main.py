@@ -15,6 +15,10 @@ from utils import find_tag, get_response, get_soup
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
     response = get_response(session, whats_new_url)
+    # TODO
+    # Вот так могу оставить, но тесты не принимают
+    # response, soup = get_response(session, whats_new_url)
+    # TODO
     soup = get_soup(response)
 
     main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
